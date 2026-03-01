@@ -4,18 +4,12 @@ Routes:
   GET  /         → serves the UI
   GET  /health   → health-check
   POST /api/ask  → RAG question-answering
-  POST /api/upload → upload a document to S3 and trigger KB sync
 """
 
 import os
 from flask import Flask, request, jsonify, render_template
 from dotenv import load_dotenv
-from bedrock_utils import (
-    retrieve_from_kb,
-    claude_chat,
-    upload_to_s3,
-    sync_knowledge_base,
-)
+from bedrock_utils import retrieve_from_kb, claude_chat
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(SCRIPT_DIR, ".env"))
@@ -110,30 +104,6 @@ def api_ask():
         else:
             user_error = "Something went wrong. Please try again."
         return jsonify({"answer": None, "sources": [], "error": user_error}), 500
-
-
-@app.post("/api/upload")
-def api_upload():
-    f = request.files.get("file")
-    if not f or not f.filename:
-        return jsonify({"error": "No file provided."}), 400
-
-    allowed = {".txt", ".pdf", ".csv", ".json", ".md"}
-    ext = os.path.splitext(f.filename)[1].lower()
-    if ext not in allowed:
-        return jsonify({"error": f"File type {ext} not supported. Allowed: {', '.join(allowed)}"}), 400
-
-    try:
-        key = upload_to_s3(f.read(), f.filename)
-        job_id = sync_knowledge_base()
-        return jsonify({
-            "message": f"Uploaded {f.filename} to S3.",
-            "s3_key": key,
-            "sync_job_id": job_id,
-        })
-    except Exception as e:
-        print(f"Upload error: {e}")
-        return jsonify({"error": "Upload failed. Please try again."}), 500
 
 
 if __name__ == "__main__":

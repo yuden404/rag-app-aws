@@ -42,16 +42,6 @@
         </div>
       </div>
 
-      <!-- File upload -->
-      <div class="upload-section">
-        <label class="upload-btn" for="fileInput">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          Upload Document
-        </label>
-        <input type="file" id="fileInput" accept=".txt,.pdf,.csv,.json,.md" hidden />
-        <div id="uploadStatus" class="upload-status"></div>
-      </div>
-
       <!-- Characters -->
       <div class="sidebar-chars">
         <div class="char-badge cartman" title="Cartman"><span>E</span></div>
@@ -110,9 +100,6 @@
       var messages = document.getElementById("messages");
       var input = document.getElementById("questionInput");
       var sendBtn = document.getElementById("sendBtn");
-      var fileInput = document.getElementById("fileInput");
-      var uploadStatus = document.getElementById("uploadStatus");
-
       // Snow
       var snow = document.getElementById("snow");
       for (var i = 0; i < 50; i++) {
@@ -132,34 +119,6 @@
         input.value = btn.textContent;
         send();
       };
-
-      // File upload
-      fileInput.addEventListener("change", function () {
-        var file = this.files[0];
-        if (!file) return;
-        uploadStatus.textContent = "Uploading " + file.name + "...";
-        uploadStatus.className = "upload-status uploading";
-
-        var fd = new FormData();
-        fd.append("file", file);
-
-        fetch("/api/upload", { method: "POST", body: fd })
-          .then(function (res) { return res.json(); })
-          .then(function (data) {
-            if (data.error) {
-              uploadStatus.textContent = data.error;
-              uploadStatus.className = "upload-status error";
-            } else {
-              uploadStatus.textContent = data.message + (data.sync_job_id ? " Syncing KB..." : "");
-              uploadStatus.className = "upload-status success";
-            }
-          })
-          .catch(function () {
-            uploadStatus.textContent = "Upload failed.";
-            uploadStatus.className = "upload-status error";
-          });
-        fileInput.value = "";
-      });
 
       function addMessage(content, role, sourcesHtml) {
         var welcome = document.querySelector(".welcome-card");

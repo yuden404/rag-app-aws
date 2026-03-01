@@ -168,48 +168,6 @@ body {
   text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
-/* ─── Upload Section ─── */
-.upload-section {
-  width: 100%;
-  margin-top: 0.8rem;
-}
-
-.upload-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding: 0.6rem 1rem;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.25);
-  backdrop-filter: blur(8px);
-  border: 1.5px dashed rgba(255,255,255,0.5);
-  color: white;
-  font-size: 0.82rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.upload-btn:hover {
-  background: rgba(255,255,255,0.35);
-  border-color: white;
-}
-
-.upload-status {
-  text-align: center;
-  font-size: 0.72rem;
-  font-weight: 500;
-  margin-top: 0.4rem;
-  min-height: 1.2em;
-}
-
-.upload-status.uploading { color: #FFF9C4; }
-.upload-status.success   { color: #C8E6C9; }
-.upload-status.error     { color: #FFCDD2; }
-
 /* ─── Character Badges ─── */
 .sidebar-chars {
   display: flex;
