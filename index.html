@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>South Park Knowledge Base — AWS</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Snow -->
+  <div class="snow" id="snow"></div>
+
+  <div class="app">
+    <aside class="sidebar">
+      <!-- South Park Sign Logo -->
+      <div class="sp-sign">
+        <div class="sign-board">
+          <div class="sign-title">SOUTH PARK</div>
+          <div class="sign-subtitle">Knowledge Base</div>
+        </div>
+        <div class="sign-posts">
+          <div class="post"></div>
+          <div class="post"></div>
+        </div>
+      </div>
+
+      <div class="sidebar-info">
+        <div class="info-card">
+          <span class="info-dot" style="background:#E63946"></span>
+          <p>Ask anything about the show, characters, episodes & more</p>
+        </div>
+        <div class="info-card">
+          <span class="info-dot" style="background:#2980B9"></span>
+          <p>Powered by AWS Bedrock + OpenSearch — answers grounded in real data</p>
+        </div>
+        <div class="info-card">
+          <span class="info-dot" style="background:#27AE60"></span>
+          <p>Supports English & Hebrew questions</p>
+        </div>
+      </div>
+
+      <!-- File upload -->
+      <div class="upload-section">
+        <label class="upload-btn" for="fileInput">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Document
+        </label>
+        <input type="file" id="fileInput" accept=".txt,.pdf,.csv,.json,.md" hidden />
+        <div id="uploadStatus" class="upload-status"></div>
+      </div>
+
+      <!-- Characters -->
+      <div class="sidebar-chars">
+        <div class="char-badge cartman" title="Cartman"><span>E</span></div>
+        <div class="char-badge stan" title="Stan"><span>S</span></div>
+        <div class="char-badge kyle" title="Kyle"><span>K</span></div>
+        <div class="char-badge kenny" title="Kenny"><span>K</span></div>
+      </div>
+
+      <!-- Mountain silhouette -->
+      <div class="mountains">
+        <svg viewBox="0 0 280 80" preserveAspectRatio="none">
+          <polygon points="0,80 40,25 80,80" fill="#4A5568"/>
+          <polygon points="50,80 110,10 170,80" fill="#2D3748"/>
+          <polygon points="30,80 70,35 90,50 120,20 160,55 180,40 210,80" fill="#1A202C"/>
+          <polygon points="140,80 200,15 260,60 280,80" fill="#4A5568"/>
+          <polygon points="200,80 240,30 280,80" fill="#2D3748"/>
+          <rect x="0" y="70" width="280" height="10" fill="white" opacity="0.9"/>
+        </svg>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="chat-header">
+        <div class="chat-title">
+          <span class="status-dot"></span>
+          Chat with South Park AI
+        </div>
+      </div>
+
+      <div class="messages" id="messages">
+        <div class="welcome-card">
+          <div class="welcome-icon">🏔️</div>
+          <h2>Welcome to South Park!</h2>
+          <p>I know everything about this quiet little mountain town. Ask me anything about characters, episodes, or the show itself.</p>
+          <div class="sample-questions">
+            <button class="sample-q" onclick="askSample(this)">Who is Cartman?</button>
+            <button class="sample-q" onclick="askSample(this)">What is South Park about?</button>
+            <button class="sample-q" onclick="askSample(this)">Who created South Park?</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <div class="input-bar">
+          <textarea id="questionInput" placeholder="Ask about South Park..." rows="1"></textarea>
+          <button id="sendBtn" type="button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      var messages = document.getElementById("messages");
+      var input = document.getElementById("questionInput");
+      var sendBtn = document.getElementById("sendBtn");
+      var fileInput = document.getElementById("fileInput");
+      var uploadStatus = document.getElementById("uploadStatus");
+
+      // Snow
+      var snow = document.getElementById("snow");
+      for (var i = 0; i < 50; i++) {
+        var f = document.createElement("div");
+        f.className = "flake";
+        f.style.left = Math.random() * 100 + "%";
+        f.style.animationDuration = (4 + Math.random() * 6) + "s";
+        f.style.animationDelay = (Math.random() * 8) + "s";
+        f.style.opacity = (0.2 + Math.random() * 0.6);
+        var size = 2 + Math.random() * 4;
+        f.style.width = size + "px";
+        f.style.height = size + "px";
+        snow.appendChild(f);
+      }
+
+      window.askSample = function(btn) {
+        input.value = btn.textContent;
+        send();
+      };
+
+      // File upload
+      fileInput.addEventListener("change", function () {
+        var file = this.files[0];
+        if (!file) return;
+        uploadStatus.textContent = "Uploading " + file.name + "...";
+        uploadStatus.className = "upload-status uploading";
+
+        var fd = new FormData();
+        fd.append("file", file);
+
+        fetch("/api/upload", { method: "POST", body: fd })
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            if (data.error) {
+              uploadStatus.textContent = data.error;
+              uploadStatus.className = "upload-status error";
+            } else {
+              uploadStatus.textContent = data.message + (data.sync_job_id ? " Syncing KB..." : "");
+              uploadStatus.className = "upload-status success";
+            }
+          })
+          .catch(function () {
+            uploadStatus.textContent = "Upload failed.";
+            uploadStatus.className = "upload-status error";
+          });
+        fileInput.value = "";
+      });
+
+      function addMessage(content, role, sourcesHtml) {
+        var welcome = document.querySelector(".welcome-card");
+        if (welcome) welcome.remove();
+
+        var div = document.createElement("div");
+        div.className = "message " + role;
+
+        var avatar = document.createElement("div");
+        avatar.className = "msg-avatar " + (role === "user" ? "avatar-user" : "avatar-bot");
+        avatar.textContent = role === "user" ? "You" : "SP";
+        div.appendChild(avatar);
+
+        var body = document.createElement("div");
+        body.className = "msg-body";
+
+        var name = document.createElement("div");
+        name.className = "msg-name";
+        name.textContent = role === "user" ? "You" : "South Park AI";
+        body.appendChild(name);
+
+        var bubble = document.createElement("div");
+        bubble.className = "msg-text";
+        bubble.innerHTML = content;
+        body.appendChild(bubble);
+
+        if (sourcesHtml) {
+          var srcDiv = document.createElement("div");
+          srcDiv.className = "sources-wrap";
+          srcDiv.innerHTML = sourcesHtml;
+          body.appendChild(srcDiv);
+        }
+
+        div.appendChild(body);
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      function addLoading() {
+        var welcome = document.querySelector(".welcome-card");
+        if (welcome) welcome.remove();
+
+        var div = document.createElement("div");
+        div.className = "message assistant";
+        div.id = "loadingMsg";
+
+        var avatar = document.createElement("div");
+        avatar.className = "msg-avatar avatar-bot";
+        avatar.textContent = "SP";
+        div.appendChild(avatar);
+
+        var body = document.createElement("div");
+        body.className = "msg-body";
+
+        var name = document.createElement("div");
+        name.className = "msg-name";
+        name.textContent = "South Park AI";
+        body.appendChild(name);
+
+        var dots = document.createElement("div");
+        dots.className = "typing-dots";
+        dots.innerHTML = '<span></span><span></span><span></span>';
+        body.appendChild(dots);
+
+        div.appendChild(body);
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      function removeLoading() {
+        var el = document.getElementById("loadingMsg");
+        if (el) el.remove();
+      }
+
+      function buildSourcesHtml(sources) {
+        if (!sources || sources.length === 0) return "";
+        var html = '<details class="sources"><summary>View sources (' + sources.length + ')</summary><div class="sources-list">';
+        for (var i = 0; i < sources.length; i++) {
+          var s = sources[i];
+          var score = typeof s.score === "number" ? (s.score * 100).toFixed(0) : "—";
+          var text = s.text.length > 180 ? s.text.substring(0, 180) + "..." : s.text;
+          html += '<div class="source-item"><span class="score">' + score + '%</span><span class="source-text">' + text + '</span></div>';
+        }
+        html += "</div></details>";
+        return html;
+      }
+
+      function send() {
+        var text = (input.value || "").trim();
+        if (!text) return;
+
+        addMessage(text, "user");
+        input.value = "";
+        input.style.height = "auto";
+        sendBtn.disabled = true;
+        addLoading();
+
+        fetch("/api/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question: text }),
+        })
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            removeLoading();
+            if (data.error && !data.answer) {
+              addMessage('<span class="error-text">' + data.error + "</span>", "assistant");
+            } else {
+              var srcHtml = buildSourcesHtml(data.sources);
+              addMessage(data.answer, "assistant", srcHtml);
+            }
+          })
+          .catch(function () {
+            removeLoading();
+            addMessage('<span class="error-text">Error communicating with the server.</span>', "assistant");
+          })
+          .finally(function () {
+            sendBtn.disabled = false;
+            input.focus();
+          });
+      }
+
+      input.addEventListener("input", function () {
+        this.style.height = "auto";
+        this.style.height = Math.min(this.scrollHeight, 120) + "px";
+      });
+
+      sendBtn.addEventListener("click", send);
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          send();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
